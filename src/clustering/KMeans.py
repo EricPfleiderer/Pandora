@@ -9,7 +9,7 @@ class KMeans:
         self.data: np.ndarray = data
         self.n_means: int = n_means
         self.init: str = init
-        self.means: np.ndarray = np.zeros(shape=n_means)
+        self.means: np.ndarray = np.zeros(shape=(n_means,)+data[0].shape)
         self.history: np.ndarray = np.expand_dims(np.zeros(data.shape[0]), axis=0)
 
         # Forgy initialization
@@ -21,7 +21,7 @@ class KMeans:
         else:
             cluster_idx = np.random.random_integers(0, n_means, size=data.shape[0])
             for n in range(n_means):
-                self.means[n] = data[np.where(cluster_idx == n)]
+                self.means[n] = np.mean(data[np.where(cluster_idx == n)], axis=0)
 
         converged: bool = False
         while not converged:
