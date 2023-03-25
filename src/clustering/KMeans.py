@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 class KMeans:
 
     def __init__(self, data: np.ndarray, n_means: int, init: str = 'forgy'):
-
         self.data: np.ndarray = data
         self.n_means: int = n_means
         self.init: str = init
+
         self.means: np.ndarray = np.zeros(shape=(n_means,)+data[0].shape)
-        self.history: np.ndarray = np.expand_dims(np.zeros(data.shape[0]), axis=0)
+        self.history2d: np.ndarray = np.expand_dims(np.zeros(data.shape[0]), axis=0)
 
         # Forgy initialization
         if init is 'forgy':
@@ -23,14 +23,17 @@ class KMeans:
             for n in range(n_means):
                 self.means[n] = np.mean(data[np.where(cluster_idx == n)], axis=0)
 
+        counter = 0
         converged: bool = False
         while not converged:
+            counter += 1
+            print(counter)
             min_dist_idx = self.assign()
             converged = self.check_convergence(min_dist_idx)
             if converged:
-                self.history = self.history[1:]
+                self.history2d = self.history2d[1:]
                 break
-            self.history = np.concatenate((self.history, np.expand_dims(min_dist_idx, axis=0)))
+            self.history2d = np.concatenate((self.history2d, np.expand_dims(min_dist_idx, axis=0)))
             self.update(min_dist_idx)
 
     def assign(self):
@@ -42,13 +45,12 @@ class KMeans:
             self.means[n] = np.mean(self.data[np.where(min_dist_idx == n)], axis=0)
 
     def check_convergence(self, min_dist_idx):
-        return np.all(np.equal(min_dist_idx, self.history[-1]))
+        return np.all(np.equal(min_dist_idx, self.history2d[-1]))
 
     def save_experiment(self, path):
-        for idx, snapshot in enumerate(self.history):
+        for idx, snapshot in enumerate(self.history2d):
             plt.figure()
             for n in range(self.n_means):
                 plt.scatter(self.data[np.where(snapshot == n), 0], self.data[np.where(snapshot == n), 1])
                 plt.title(f'Iteration #{idx}')
                 plt.savefig(f'{path}iter{idx}.png')
-

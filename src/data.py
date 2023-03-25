@@ -22,7 +22,7 @@ def sample_multinormals(n_dists: int = 5, n_points: int = 20, dims: int = 2, loc
     synth_data = np.empty((n_dists, n_points, dims))
 
     for idx, loc in enumerate(dist_locs):
-        synth_data[idx] = np.random.normal(loc=loc, scale=np.random.uniform(scale_bounds[0], scale_bounds[1]),
+        synth_data[idx] = np.random.normal(loc=loc, scale=np.random.uniform(scale_bounds[0], scale_bounds[1], size=dims),
                                            size=(n_points, dims))
 
     random_data = np.random.permutation(synth_data.reshape((n_dists*n_points, dims)))
