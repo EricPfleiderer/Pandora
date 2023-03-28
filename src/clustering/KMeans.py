@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 class KMeans:
 
-    def __init__(self, data: np.ndarray, n_means: int, init: str = 'forgy'):
+    def __init__(self, data: np.ndarray, n_means: int, init: str = 'forgy', max_iters=100):
         self.data: np.ndarray = data
         self.n_means: int = n_means
         self.init: str = init
@@ -13,7 +13,7 @@ class KMeans:
         self.history2d: np.ndarray = np.expand_dims(np.zeros(data.shape[0]), axis=0)
 
         # Forgy initialization
-        if init is 'forgy':
+        if init == 'forgy':
             indexes = np.arange(0, data.shape[0])
             self.means = data[np.random.choice(indexes, size=n_means)]
 
@@ -27,6 +27,10 @@ class KMeans:
         converged: bool = False
         while not converged:
             counter += 1
+
+            if counter >= max_iters:
+                print('Failed to converge within maximum allowed iterations.')
+                break
             print(counter)
             min_dist_idx = self.assign()
             converged = self.check_convergence(min_dist_idx)
