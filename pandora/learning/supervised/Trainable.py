@@ -3,8 +3,8 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.data import get_loaders
-from src.learning.supervised.classification.classifiers import get_classifier
+from pandora.data import get_loaders
+from pandora.learning.supervised.classification.classifiers import get_classifier
 
 import logging
 
