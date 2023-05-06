@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Tuple
-from src.data import SupportedDatasets
+from pandora.data import SupportedDatasets
 
 
 class ImageClassifier(nn.Module):
