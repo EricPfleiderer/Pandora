@@ -13,7 +13,12 @@ setup(
     author_email="e.pfleiderer@hotmail.com",
     license='MIT',
     packages=find_packages(),
-    install_requires=[],
+    install_requires=[
+        'numpy',
+        'matplotlib',
+        'torch',
+        'torchvision'
+    ],
     keywords='conversion',
     classifiers= [
         "Development Status :: 3 - Alpha",
