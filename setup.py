@@ -5,7 +5,7 @@ DESCRIPTION = 'A data science roadmap'
 LONG_DESCRIPTION = 'A long term project for archiving past handcrafted code for future reference'
 
 setup(
-    name="src",
+    name="pandora",
     version=VERSION,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
