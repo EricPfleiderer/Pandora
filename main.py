@@ -1,7 +1,4 @@
-
-
 """
-
 data extraction (scraping, online APIS, regex) & formatting (pandas, numpy)
 
 data analysis:
@@ -23,15 +20,14 @@ machine learning
     -ensemble methods (Random forests, adaboosting)
 """
 
-
-# Experiment
-from src.unsupervised.clustering.KMeans import KMeans
 import matplotlib.pyplot as plt
+from src.learning.unsupervised.clustering.KMeans import KMeans
 from src.data import sample_multinormals
 from src.utils import stitch_images, create_experiment_dir
+from src.data import SupportedDatasets
 
 
-def run_clustering_experiment(params):
+def run_clustering_experiment(params: dict):
 
     # TODO: load from params
 
@@ -51,3 +47,13 @@ def run_clustering_experiment(params):
     plt.title('Solution')
     plt.savefig(experiment_path + 'sol.png')
 
+
+def run_classification_experiment(params: dict):
+    pass
+
+
+experiment_params = {'dataset': SupportedDatasets.MNIST,
+
+}
+
+run_classification_experiment(experiment_params)

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 VERSION = '0.0.1'
 DESCRIPTION = 'A data science roadmap'
-LONG_DESCRIPTION = 'A long term project that is both for fun and for archiving past code/knowledge for future reference'
+LONG_DESCRIPTION = 'A long term project for archiving past handcrafted code for future reference'
 
 setup(
     name="pandora",
@@ -19,8 +19,8 @@ setup(
         'torch',
         'torchvision'
     ],
-    keywords='conversion',
-    classifiers= [
+    keywords='roadmap',
+    classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         'License :: OSI Approved :: MIT License',
