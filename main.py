@@ -25,13 +25,16 @@ machine learning
 
 
 # Experiment
-from src.clustering.KMeans import KMeans
+from src.unsupervised.clustering.KMeans import KMeans
 import matplotlib.pyplot as plt
 from src.data import sample_multinormals
 from src.utils import stitch_images, create_experiment_dir
 
 
 def run_clustering_experiment(params):
+
+    # TODO: load from params
+
     n_means = 4  # Hyperparameter
     n_dists = 4
     experiment_path = create_experiment_dir(save_path='Experiments/', params=params)
@@ -48,5 +51,3 @@ def run_clustering_experiment(params):
     plt.title('Solution')
     plt.savefig(experiment_path + 'sol.png')
 
-
-run_clustering_experiment(params=dict())

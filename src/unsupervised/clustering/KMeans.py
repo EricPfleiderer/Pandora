@@ -27,27 +27,29 @@ class KMeans:
         converged: bool = False
         while not converged:
             counter += 1
-
             if counter >= max_iters:
                 print('Failed to converge within maximum allowed iterations.')
                 break
-            print(counter)
+
             min_dist_idx = self.assign()
             converged = self.check_convergence(min_dist_idx)
             if converged:
                 self.history2d = self.history2d[1:]
                 break
+
             self.history2d = np.concatenate((self.history2d, np.expand_dims(min_dist_idx, axis=0)))
             self.update(min_dist_idx)
 
-    def assign(self):
+    def assign(self) -> np.ndarray:
         distances = np.transpose(np.array([np.linalg.norm(self.data - self.means[n], axis=1) for n in range(self.n_means)]))
         return np.argmin(distances, axis=1)
 
-    def update(self, min_dist_idx):
+    # Update each clusters' mean in place.
+    def update(self, min_dist_idx) -> None:
         for n in range(self.n_means):
             self.means[n] = np.mean(self.data[np.where(min_dist_idx == n)], axis=0)
 
+    # Convergence test
     def check_convergence(self, min_dist_idx):
         return np.all(np.equal(min_dist_idx, self.history2d[-1]))
 
