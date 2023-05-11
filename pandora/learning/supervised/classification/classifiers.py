@@ -4,6 +4,19 @@ import torch.nn.functional as F
 from typing import Tuple
 from pandora.data import SupportedDatasets
 
+from abc import ABC, abstractmethod
+
+
+class SupervisedClassifier(ABC):
+
+    @abstractmethod
+    def fit(self, x, y):
+        pass
+
+    @abstractmethod
+    def predict(self, x):
+        pass
+
 
 class ImageClassifier(nn.Module):
 
