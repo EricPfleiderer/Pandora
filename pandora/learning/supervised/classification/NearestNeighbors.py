@@ -48,8 +48,8 @@ class NearestNeighbors(SupervisedClassifier):
             # Find neighbors in the window
             neighbor_idx = self.find_neighbors(sample)
 
-            # TODO: manage empty neighbor_idx case
             if len(neighbor_idx) == 0:
+                # Random vote between classes
                 labels[idx] = np.random.random_integers(1, self._n_classes)
 
             else:
