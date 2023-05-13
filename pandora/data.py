@@ -3,13 +3,14 @@ from enum import Enum
 from functools import partial
 
 import numpy as np
-import torch.utils.data as data
+from torch.utils.data import DataLoader
 import torchvision.datasets as torch_datasets
 import torchvision.transforms as transforms
 
 
 def sample_multinormals(n_dists: int = 5, n_points: int = 50, dims: int = 2, loc_bounds: Tuple[float, float] = (-5, 5),
-                        scale_bounds: Tuple[float, float] = (0.5, 1)) -> Tuple[np.ndarray, np.ndarray]:
+                        scale_bounds: Tuple[float, float] = (0.5, 1)) -> \
+                        Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
 
     """
     Samples 'n_points' points from 'n_dists' gaussian distributions of dimensions 'dims', each with bounded and
@@ -20,7 +21,7 @@ def sample_multinormals(n_dists: int = 5, n_points: int = 50, dims: int = 2, loc
     :param dims: Dimensionality of the data.
     :param loc_bounds: Bounds of the location parameter of the gaussian distributions.
     :param scale_bounds: Bounds of the scale parameter of the gaussian distributions.
-    :return:
+    :return Tuple of np.ndarrays: Training and test sets.
     """
 
     synth_x = np.empty((0, dims))
@@ -38,7 +39,11 @@ def sample_multinormals(n_dists: int = 5, n_points: int = 50, dims: int = 2, loc
     synth_x = synth_x[random_idx]
     synth_y = synth_y[random_idx]
 
-    return synth_x, synth_y
+    train_test_split = int(0.8*len(synth_x))
+    train_x, train_y = synth_x[:train_test_split], synth_y[:train_test_split]
+    test_x, test_y = synth_x[train_test_split:], synth_y[train_test_split:]
+
+    return (train_x, train_y), (test_x, test_y)
 
 
 class CustomDatasets(Enum):
@@ -60,7 +65,7 @@ def get_custom_dataset(dataset: CustomDatasets, **kwargs):
 
 
 def get_torch_dataset(dataset: TorchDatasets, save_path: str = 'data/', download: bool = True) \
-        -> (data.DataLoader, data.DataLoader):
+        -> (DataLoader, DataLoader):
 
     """
     Fetches, caches and formats a torch dataset.
@@ -90,8 +95,8 @@ def get_torch_dataset(dataset: TorchDatasets, save_path: str = 'data/', download
         return train_ds, test_ds
 
 
-def get_loaders(dataset: Union[TorchDatasets, CustomDatasets], batch_size: int, save_path: str = 'data/',
-                download: bool = True, shuffle: bool = True, **kwargs) -> (data.DataLoader, data.DataLoader):
+def get_loaders(dataset: Union[TorchDatasets], batch_size: int, save_path: str = 'data/',
+                download: bool = True, shuffle: bool = True, **kwargs) -> (DataLoader, DataLoader):
 
     """
     Builds training and testing torch loaders from a torch dataset from the SupportedDatasets enumerator.
@@ -111,7 +116,7 @@ def get_loaders(dataset: Union[TorchDatasets, CustomDatasets], batch_size: int, 
     else:
         raise ValueError(f'Please use the {TorchDatasets} and {CustomDatasets} enums to specify the dataset.')
 
-    train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=shuffle)
-    test_loader = data.DataLoader(test_ds, batch_size=batch_size, shuffle=shuffle)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=shuffle)
+    test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=shuffle)
     return train_loader, test_loader
 
