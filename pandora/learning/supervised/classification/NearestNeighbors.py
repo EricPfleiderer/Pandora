@@ -9,6 +9,7 @@ class NearestNeighbors(SupervisedClassifier):
         self._window = window
         self._x = None
         self._y = None
+        self._n_classes = None
 
     def fit(self, x: np.ndarray, y: np.ndarray):
         """
@@ -25,6 +26,7 @@ class NearestNeighbors(SupervisedClassifier):
 
         self._x = x
         self._y = y
+        self._n_classes = len(np.unique(self._y))
 
         return self
 
@@ -44,20 +46,27 @@ class NearestNeighbors(SupervisedClassifier):
 
         for idx, sample in enumerate(x):
             # Find neighbors in the window
-            neighbor_idx = np.where(np.linalg.norm(sample-self._x) < self._window)
+            neighbor_idx = self.find_neighbors(sample)
 
-            # Find and count the labels of the neighbors
-            unique, counts = np.unique(neighbor_idx, return_counts=True)
+            # TODO: manage empty neighbor_idx case
+            if len(neighbor_idx) == 0:
+                labels[idx] = np.random.random_integers(1, self._n_classes)
 
-            # Majority vote (mode)
-            labels[idx] = unique[np.where(counts == np.max(counts))]
+            else:
+                # Find and count the labels of the neighbors
+                unique, counts = np.unique(self._y[neighbor_idx], return_counts=True)
+
+                # Majority vote (mode)
+                labels[idx] = int(unique[np.where(counts == np.max(counts))])
 
         return labels
 
-    def find_neighbors(self, x: np.ndarray):
+    def find_neighbors(self, sample: np.ndarray):
 
         """
-
-        :param x: 1-dimensional array (single sample).
+        Find and return the nearest neighbors of a single sample based on the window.
+        :param sample: 1-dimensional array (single sample).
         :return: 1-dimensional array containing the nearest
         """
+
+        return np.where(np.linalg.norm(sample-self._x, axis=1) < self._window)[0]
