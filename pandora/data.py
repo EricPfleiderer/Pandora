@@ -1,8 +1,8 @@
-import numpy as np
 from typing import Tuple, Union
 from enum import Enum
 from functools import partial
 
+import numpy as np
 import torch.utils.data as data
 import torchvision.datasets as torch_datasets
 import torchvision.transforms as transforms
@@ -23,23 +23,23 @@ def sample_multinormals(n_dists: int = 5, n_points: int = 50, dims: int = 2, loc
     :return:
     """
 
-    # Location of the barycenter for our synthetic data distributions
-
     synth_x = np.empty((0, dims))
     synth_y = np.empty(0)
 
     for dist in range(n_dists):
         loc = np.random.uniform(loc_bounds[0], loc_bounds[1], size=dims)
         scale = np.random.uniform(scale_bounds[0], scale_bounds[1], size=(dims, dims))
-        points = np.random.multivariate_normal(loc, scale, size =n_points)
+        points = np.random.multivariate_normal(loc, scale, size=n_points)
         synth_x = np.concatenate((synth_x, points))
-        synth_y = np.concatenate((synth_y, [dist+1 for n in range(n_points)]))
+        synth_y = np.concatenate((synth_y, [dist+1 for _ in range(n_points)]))
 
+    # Randomize the data
     random_idx = np.random.permutation(np.arange(len(synth_x)))
     synth_x = synth_x[random_idx]
     synth_y = synth_y[random_idx]
 
     return synth_x, synth_y
+
 
 class CustomDatasets(Enum):
     # Synthetic
@@ -59,7 +59,8 @@ def get_custom_dataset(dataset: CustomDatasets, **kwargs):
     return dataset.value(**kwargs)
 
 
-def get_torch_dataset(dataset: TorchDatasets, save_path: str = 'data/', download: bool = True) -> (data.DataLoader, data.DataLoader):
+def get_torch_dataset(dataset: TorchDatasets, save_path: str = 'data/', download: bool = True) \
+        -> (data.DataLoader, data.DataLoader):
 
     """
     Fetches, caches and formats a torch dataset.
@@ -89,8 +90,8 @@ def get_torch_dataset(dataset: TorchDatasets, save_path: str = 'data/', download
         return train_ds, test_ds
 
 
-def get_loaders(dataset: Union[TorchDatasets, CustomDatasets], batch_size: int, save_path: str = 'data/', download: bool = True,
-                shuffle: bool = True, **kwargs) -> (data.DataLoader, data.DataLoader):
+def get_loaders(dataset: Union[TorchDatasets, CustomDatasets], batch_size: int, save_path: str = 'data/',
+                download: bool = True, shuffle: bool = True, **kwargs) -> (data.DataLoader, data.DataLoader):
 
     """
     Builds training and testing torch loaders from a torch dataset from the SupportedDatasets enumerator.
