@@ -1,13 +1,14 @@
 import numpy as np
-from typing import Tuple
+from typing import Tuple, Union
 from enum import Enum
+from functools import partial
 
 import torch.utils.data as data
-import torchvision.datasets as datasets
+import torchvision.datasets as torch_datasets
 import torchvision.transforms as transforms
 
 
-def sample_multinormals(n_dists: int = 5, n_points: int = 20, dims: int = 2, loc_bounds: Tuple[float, float] = (-5, 5),
+def sample_multinormals(n_dists: int = 5, n_points: int = 50, dims: int = 2, loc_bounds: Tuple[float, float] = (-5, 5),
                         scale_bounds: Tuple[float, float] = (0.5, 1)) -> Tuple[np.ndarray, np.ndarray]:
 
     """
@@ -23,27 +24,42 @@ def sample_multinormals(n_dists: int = 5, n_points: int = 20, dims: int = 2, loc
     """
 
     # Location of the barycenter for our synthetic data distributions
-    dist_locs = np.random.uniform(loc_bounds[0], loc_bounds[1], size=(n_dists, dims))
-    synth_data = np.empty((n_dists, n_points, dims))
 
-    for idx, loc in enumerate(dist_locs):
-        synth_data[idx] = np.random.normal(loc=loc, scale=np.random.uniform(scale_bounds[0], scale_bounds[1], size=dims),
-                                           size=(n_points, dims))
+    synth_x = np.empty((0, dims))
+    synth_y = np.empty(0)
 
-    random_data = np.random.permutation(synth_data.reshape((n_dists*n_points, dims)))
+    for dist in range(n_dists):
+        loc = np.random.uniform(loc_bounds[0], loc_bounds[1], size=dims)
+        scale = np.random.uniform(scale_bounds[0], scale_bounds[1], size=(dims, dims))
+        points = np.random.multivariate_normal(loc, scale, size =n_points)
+        synth_x = np.concatenate((synth_x, points))
+        synth_y = np.concatenate((synth_y, [dist+1 for n in range(n_points)]))
 
-    return synth_data, random_data
+    random_idx = np.random.permutation(np.arange(len(synth_x)))
+    synth_x = synth_x[random_idx]
+    synth_y = synth_y[random_idx]
+
+    return synth_x, synth_y
+
+class CustomDatasets(Enum):
+    # Synthetic
+    MULTINORMAL = partial(sample_multinormals)
 
 
-class SupportedDatasets(Enum):
-
+class TorchDatasets(Enum):
     # Vision
-    MNIST = datasets.MNIST
-    CIFAR10 = datasets.CIFAR10
-    CIFAR100 = datasets.CIFAR100
+    MNIST = torch_datasets.MNIST
+    CIFAR10 = torch_datasets.CIFAR10
+    CIFAR100 = torch_datasets.CIFAR100
 
 
-def get_dataset(dataset: SupportedDatasets, save_path: str = 'data/', download: bool = True) -> (data.DataLoader, data.DataLoader):
+def get_custom_dataset(dataset: CustomDatasets, **kwargs):
+    if not isinstance(dataset, CustomDatasets):
+        raise ValueError(f'Please use the {CustomDatasets} enumerator to specify the dataset.')
+    return dataset.value(**kwargs)
+
+
+def get_torch_dataset(dataset: TorchDatasets, save_path: str = 'data/', download: bool = True) -> (data.DataLoader, data.DataLoader):
 
     """
     Fetches, caches and formats a torch dataset.
@@ -54,8 +70,8 @@ def get_dataset(dataset: SupportedDatasets, save_path: str = 'data/', download: 
     :return:
     """
 
-    if not isinstance(dataset, SupportedDatasets):
-        raise ValueError(f'Please use the {SupportedDatasets} enumerator to specify the dataset.')
+    if not isinstance(dataset, TorchDatasets):
+        raise ValueError(f'Please use the {TorchDatasets} enumerator to specify the dataset.')
 
     else:
 
@@ -73,8 +89,8 @@ def get_dataset(dataset: SupportedDatasets, save_path: str = 'data/', download: 
         return train_ds, test_ds
 
 
-def get_loaders(dataset: SupportedDatasets, batch_size: int, save_path: str = 'data/', download: bool = True,
-                shuffle: bool = True) -> (data.DataLoader, data.DataLoader):
+def get_loaders(dataset: Union[TorchDatasets, CustomDatasets], batch_size: int, save_path: str = 'data/', download: bool = True,
+                shuffle: bool = True, **kwargs) -> (data.DataLoader, data.DataLoader):
 
     """
     Builds training and testing torch loaders from a torch dataset from the SupportedDatasets enumerator.
@@ -87,7 +103,13 @@ def get_loaders(dataset: SupportedDatasets, batch_size: int, save_path: str = 'd
     :return:
     """
 
-    train_ds, test_ds = get_dataset(dataset, save_path, download)
+    if isinstance(dataset, TorchDatasets):
+        train_ds, test_ds = get_torch_dataset(dataset, save_path, download)
+    elif isinstance(dataset, CustomDatasets):
+        train_ds, test_ds = get_custom_dataset(dataset, **kwargs)
+    else:
+        raise ValueError(f'Please use the {TorchDatasets} and {CustomDatasets} enums to specify the dataset.')
+
     train_loader = data.DataLoader(train_ds, batch_size=batch_size, shuffle=shuffle)
     test_loader = data.DataLoader(test_ds, batch_size=batch_size, shuffle=shuffle)
     return train_loader, test_loader
