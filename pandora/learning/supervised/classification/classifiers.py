@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Tuple
-from pandora.data import SupportedDatasets
+from pandora.data import TorchDatasets
 
 from abc import ABC, abstractmethod
 
@@ -57,7 +57,7 @@ class ImageClassifier(nn.Module):
         return F.log_softmax(x, dim=-1)
 
 
-def get_classifier(dataset: SupportedDatasets):
+def get_classifier(dataset: TorchDatasets):
     if dataset.name == 'MNIST':
         return ImageClassifier((1, 28, 28), 10)
     elif dataset.name == 'CIFAR10':
